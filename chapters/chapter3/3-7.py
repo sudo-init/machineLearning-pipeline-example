@@ -41,10 +41,11 @@ def convert_zipcode_to_int(zipcode):
 
 dir_path = Path(__file__).parent.absolute()
 data_dir = os.path.join(dir_path, "..", "..", "data")
+tfrecord_dir = os.path.join(dir_path, "..", "..", "data", "tfrecord")
 df = pd.read_csv(os.path.join(data_dir, "processed-complaints.csv"))
 
 tfrecord_filename = "consumer-complaints.tfrecord"
-tfrecord_filepath = os.path.join(data_dir, tfrecord_filename)
+tfrecord_filepath = os.path.join(tfrecord_dir, tfrecord_filename)
 # tfrecord_filename에 지정된 경로에 저장하는 TFRecordWriter 객체를 만듭니다.
 tf_record_writer = tf.io.TFRecordWriter(tfrecord_filepath)
 

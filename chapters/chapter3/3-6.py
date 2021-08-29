@@ -12,6 +12,9 @@ filepath = tf.keras.utils.get_file(
 
 dir_path = Path(__file__).parent.absolute()
 data_dir = os.path.join(dir_path, "..", "..", "data")
+processed_dir = os.path.join(dir_path, "..", "..", "data", "processed")
+Path(processed_dir).mkdir(parents=True, exist_ok=True)
+
 # 압축을 해제합니다.
 shutil.unpack_archive(filepath, data_dir)
 # pandas로 csv 파일을 읽어 들입니다.
@@ -34,5 +37,13 @@ df = df.dropna(subset=["consumer_complaint_narrative", "consumer_disputed"])
 df.loc[df["consumer_disputed"] == "Yes", "consumer_disputed"] = 1
 df.loc[df["consumer_disputed"] == "No", "consumer_disputed"] = 0
 
+df.loc[df["zip_code"] == "", "zip_code"] = "000000"
+df.loc[pd.isna(df["zip_code"]), "zip_code"] = "000000"
+
+df = df[df['zip_code'].str.len() == 5]
+df["zip_code"] = df['zip_code'].str.replace('XX', '00')
+df = df.reset_index(drop=True)
+df["zip_code"] = pd.to_numeric(df["zip_code"], errors='coerce')
+
 # 판다스 DataFrame을 csv 파일로 다시 저장합니다.
-df.to_csv(os.path.join(data_dir, "processed-complaints.csv"), index=False)
+df.to_csv(os.path.join(processed_dir, "processed-complaints.csv"), index=False)

@@ -38,7 +38,7 @@ def _gzip_reader_fn(filenames):
 def _get_serve_tf_examples_fn(model, tf_transform_output):
     """Returns a function that parses a serialized tf.Example and applies TFT.
     """
-
+    # 전처리 그래프를 로드합니다.
     model.tft_layer = tf_transform_output.transform_features_layer()
 
     @tf.function
@@ -46,10 +46,12 @@ def _get_serve_tf_examples_fn(model, tf_transform_output):
         """Returns the output to be used in the serving signature."""
         feature_spec = tf_transform_output.raw_feature_spec()
         feature_spec.pop(features.LABEL_KEY)
+        # 요청에서 원시tf.Example 레코드를 구문 분석합니다.
         parsed_features = tf.io.parse_example(
             serialized_tf_examples, feature_spec
         )
 
+        # 전처리 변환을 원시 데이터에 적용합니다.
         transformed_features = model.tft_layer(parsed_features)
 
         return model(transformed_features)
@@ -164,7 +166,7 @@ def run_fn(fn_args):
   """
 
     tf_transform_output = tft.TFTransformOutput(fn_args.transform_output)
-
+    # input_fn 을 호출하여 데이터 생성기를 가져옵니다.
     train_dataset = _input_fn(
         fn_args.train_files, tf_transform_output, constants.TRAIN_BATCH_SIZE
     )
@@ -172,6 +174,7 @@ def run_fn(fn_args):
         fn_args.eval_files, tf_transform_output, constants.EVAL_BATCH_SIZE
     )
 
+    # get_model함수를 호출하여 컴파일된 케라스 모델을 가져옵니다.
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
         model = get_model()
@@ -185,10 +188,12 @@ def run_fn(fn_args):
         train_dataset,
         steps_per_epoch=fn_args.train_steps,
         validation_data=eval_dataset,
+        # Trainer 컴포넌트가 통과한 학습 및 평가 단계 수를 사용하여 모델을 학습합니다.
         validation_steps=fn_args.eval_steps,
         callbacks=[tensorboard_callback],
     )
 
+    # 나중에 설명할 서빙 피처를 포함하는 모델 서명을 정의합니다.
     signatures = {
         "serving_default": _get_serve_tf_examples_fn(
             model, tf_transform_output
