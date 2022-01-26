@@ -1,3 +1,10 @@
+# Repository Explain
+
+해당 저장소에 있는 내용은 도서 '살아 움직이는 머신러닝 파이프라인 설계'의 예제 프로젝트에 관련된 것입니다.
+
+The contents in the storage relate to an example project of the book "Building Machine Learning Pipeline."
+
+
 # Building Machine Learning Pipelines
 
 Code repository for the O'Reilly publication ["Building Machine Learning Pipelines"](http://www.buildingmlpipelines.com) by Hannes Hapke &amp; Catherine Nelson
